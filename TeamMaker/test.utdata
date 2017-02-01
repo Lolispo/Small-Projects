@@ -1,0 +1,132 @@
+Global = 6
+Petter (Petter) : CS:GO = 6, dota = 4. Lang = English,Svenska
+Silver/Unranked = 1
+spoder (SimonWredh) : CS:GO = 1, dota = 6. Lang = English,Svenska
+Supreme = 5
+VonDobblen (Unknown Name) : CS:GO = 5, dota = 4. Lang = English,Svenska
+Silver/Unranked = 1
+Gaggg (Jesper) : CS:GO = 1, dota = 2. Lang = English,Svenska
+GoldNova/AK = 2
+Galnegunnar (Unknown Name) : CS:GO = 2, dota = 4. Lang = English,Svenska
+Supreme = 5
+Shuuna (David) : CS:GO = 5, dota = 3. Lang = English,Svenska
+DMG/LE = 3
+Bob (:() : CS:GO = 3, dota = 2. Lang = English,Svenska
+Silver/Unranked = 1
+Smile (Jonas) : CS:GO = 1, dota = 5. Lang = English,Norsk
+DMG/LE = 3
+WTHX (JohanG) : CS:GO = 3, dota = 4. Lang = English,Svenska
+Silver/Unranked = 1
+Marius (Unknown Name) : CS:GO = 1, dota = 5. Lang = English,Svenska,Norsk
+s6 = [{spoder(6),}{}]
+s5 = [{Smile(5),}{Marius(5),}]
+s4 = [{Petter(4),WTHX(4),}{VonDobblen(4),Galnegunnar(4),}]
+s3 = [{Shuuna(3),}{}]
+s2 = [{Gaggg(2),}{Bob(2),}]
+s1 = [{}{}]
+fi = [{}{}]
+Team 1: Player 1: spoder         Skill-level: 6
+Team 1: Player 2: Petter         Skill-level: 4
+Team 1: Player 3: WTHX           Skill-level: 4
+Team 1: Player 4: Shuuna         Skill-level: 3
+Team 1: Player 5: Gaggg          Skill-level: 2
+Team 2: Player 1: Smile          Skill-level: 5
+Team 2: Player 2: Marius         Skill-level: 5
+Team 2: Player 3: VonDobblen     Skill-level: 4
+Team 2: Player 4: Galnegunnar    Skill-level: 4
+Team 2: Player 5: Bob            Skill-level: 2
+Team 1 had 19 total in skill rating.
+Team 2 had 20 total in skill rating.
+Team 1: spoder, Petter, WTHX, Shuuna, Gaggg
+Team 2: Smile, Marius, VonDobblen, Galnegunnar, Bob
+
+Ubuntu commands
+pwd - path of working directory
+ln - create a link (soft/hard) to a file
+	Fil
+Wc - word count. -w räknar words
+Uniq - removes dublicates
+Grep - search file for pattern
+Less / More - kan inte backtracka, det kan less
+diff 	diff 2 files
+tr ersätta chars 		tr '[:upper:]' '[:lower:]'	fil | less
+sed -e 's/[?,]//g' | less			ersätter komma o frågetecken med ingenting globalt
+
+pipe 	hämta fil | ä ndra fil värden| ge nåt coolt			output -> input genom |
+
+gnuplot: plot "file.in" using 1:2 with linepoint
+
+Tenta fråga:
+ echo "cd foo grep bar" | wc -w		skickar in strängen till wc -w som räknar ord. 4
+
+echo "cd foo grep cd" | sed -e 's/[ ]/\n/g' | sort | uniq -c | sort -r
+List command
+
+eog 		öppna bilder
+Gnuplot 	göra grafer
+
+
+Processes
+Stackframe - holds argument, local variables and return information
+
+Cpu contains
+the instruction pointer (EIP): a reference to the next instruction to execute 
+a stack pointer (ESP): a reference to the top of the stack 
+a base pointer (EBP): a reference to the current stack frame
+general purpose registers: used by a process to store data
+(E)Instruction Pointer, (E)Stack Pointer, (E)Base Pointer
+
+*malloc(size_t size), allocates data on heap. 	Calloc is same but reset
+
+Memory layout	(bild)
+Code, Data, Heap -> 		<- Stack, OS		Växer mot varandra
+
+
+Balancing players for games
+Petter
+Links: 
+
+Spread Sheet -   https://docs.google.com/spreadsheets/d/1NNavWEzEf9gx3hBzh0vpQ_5pn7kjievQyiXA3PRhU34/edit#gid=31358158
+
+Form - https://goo.gl/forms/7bXgKamKhHB5yJU33
+
+Edit Form and responses - https://docs.google.com/forms/d/1D8k3N7RNEdV6GpWqt7f8_I2W0ucWtQAb8ok97IQuxmc/edit#responses
+
+JSON - https://github.com/ralfstx/minimal-json/blob/master/README.md
+
+
+TODO:
+Choose from players
+Automatic Responses from Sheet to Java
+Interrogation with Google API
+https://developers.google.com/sheets/api/quickstart/java
+GUI for input to balancing System
+Crossboxes for pressing every player that’s playing
+Add custom players (not regulars) for easying the algoritm
+Add name and skillrating to these players
+(Question) Should they be added to database? Yes? (test)
+Presets for Overthrow, Inhouses etc (Inhouse 5v5 is default)
+Balancing System
+Make Balanced Algorithm handle: 
+Amount of Teams
+Amount of Players in every team
+Game
+More complex options to base teams of later on
+Languages
+Make users put in CS Rank and Dota MMR to translate into numbers
+Will have to change comparison based on this (comparison with numbers)
+
+
+Take into consideration how an average cs compares to a top cs
+Is top worth a 3 and an average 2? Does it sound balanced
+Allows for: (Sounds good atm, relies on players being good judgement)
+Team 1: 3,3,2,2,1
+Team 2: 3,2,2,2,2
+PseudoRandom
+
+
+Finished:
+Add complete random option ( Should be used within inner levels of balanced between equally skilled tiers, all globals are randomly distributed)
+JSON to Java
+Added Rank and MMR system. Currently 1-6, requires testing
+

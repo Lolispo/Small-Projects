@@ -1,0 +1,99 @@
+[
+    {
+        "timestamp": "2016-12-28T02:12:47.577Z",
+        "dota2": 2,
+        "csgo": 3,
+        "username": "Petter",
+        "languages": "English, Svenska",
+        "name": "Petter",
+        "csgoRank": "Global",
+        "dota2Mmr": "4500-5500"
+    },
+    {
+        "timestamp": "2016-12-28T21:19:29.252Z",
+        "dota2": 3,
+        "csgo": 1,
+        "username": "spoder",
+        "languages": "English, Svenska",
+        "name": "Simon Wredh",
+        "csgoRank": "Silver/Unranked",
+        "dota2Mmr": "6500+"
+    },
+    {
+        "timestamp": "2016-12-28T21:21:22.565Z",
+        "dota2": 2,
+        "csgo": 2,
+        "username": "Von Dobblen",
+        "languages": "English, Svenska",
+        "csgoRank": "Supreme",
+        "dota2Mmr": "4500-5500"
+    },
+    {
+        "timestamp": "2016-12-28T21:21:45.336Z",
+        "dota2": 2,
+        "csgo": 0,
+        "username": "Gaggg",
+        "languages": "English, Svenska",
+        "name": "Jesper",
+        "csgoRank": "Silver/Unranked",
+        "dota2Mmr": "2500-3500"
+    },
+    {
+        "timestamp": "2016-12-28T21:22:29.613Z",
+        "dota2": 3,
+        "csgo": 2,
+        "username": "Galnegunnar",
+        "languages": "English, Svenska",
+        "csgoRank": "Gold Nova/AK",
+        "dota2Mmr": "4500-5500"
+    },
+    {
+        "timestamp": "2016-12-28T21:26:17.835Z",
+        "dota2": 3,
+        "csgo": 3,
+        "username": "Shuuna",
+        "languages": "English, Svenska",
+        "name": "David",
+        "csgoRank": "Supreme",
+        "dota2Mmr": "3500-4500"
+    },
+    {
+        "timestamp": "2016-12-28T21:27:39.339Z",
+        "dota2": 1,
+        "csgo": 2,
+        "username": "Bob",
+        "languages": "English, Svenska",
+        "name": ":(",
+        "csgoRank": "DMG/LE",
+        "dota2Mmr": "2500-3500"
+    },
+    {
+        "timestamp": "2016-12-28T21:31:09.800Z",
+        "dota2": 3,
+        "csgo": 1,
+        "username": "Smile",
+        "languages": "English, Norsk",
+        "name": "Jonas",
+        "csgoRank": "Silver/Unranked",
+        "dota2Mmr": "5500-6500"
+    },
+    {
+        "timestamp": "2016-12-28T21:37:36.767Z",
+        "dota2": 3,
+        "csgo": 2,
+        "username": "WTHX",
+        "languages": "English, Svenska",
+        "name": "Johan G",
+        "csgoRank": "DMG/LE",
+        "dota2Mmr": "4500-5500"
+    },
+    {
+        "timestamp": "2016-12-28T21:59:12.568Z",
+        "dota2": 3,
+        "csgo": 0,
+        "username": "Marius",
+        "languages": "English, Svenska, Norsk",
+        "csgoRank": "Silver/Unranked",
+        "dota2Mmr": "5500-6500"
+    }
+]
