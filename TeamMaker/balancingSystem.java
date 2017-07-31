@@ -6,6 +6,15 @@ import javax.swing.*;
 // TODO are added in drive document atm for project
 // https://docs.google.com/document/d/1p4oNbBUb0dUV3-gGakf0nSoB1pZ1ikyoZjveuWObLLg/edit
 
+/*
+	Göra alla kombinationer av lag, 10 över 5
+		Varje lag kombination sparar en skilllevel siffra mellan sig och siffra jämförelse med tidigare games
+	beräkna lägsta siffran av skill level jämförelse
+	efter ett game spelat - beräkna jämförelse med lagen, få ut nya lägsta
+
+
+*/
+
 public class balancingSystem{
 
 	private int amountTeams;
@@ -17,9 +26,12 @@ public class balancingSystem{
 
 	private ArrayList<Player> playerList;
 
+	private ArrayList<TeamCombination> teamCombs;
+
+	// Gör om så att man inte väljer game by default, man gör det i GUI
 	balancingSystem(int teams, int players, int game){
-		this.amountTeams = teams;
-		this.amountPlayers = players;
+		this.amountTeams = teams; // Amount of teams
+		this.amountPlayers = players; // PER TEAM
 		this.game = game;
 
 		r = new Random();
@@ -31,8 +43,10 @@ public class balancingSystem{
 			sb.append(io.getWord());
 		}
 		readJSONData(sb.toString());
+		activePlayers(playerList);
 		//ArrayList<ArrayList<Player>> randomTeams = randomSeparation(playerList);
 		//print(randomTeams);
+		teamCombs = new ArrayList<TeamCombination>();
 		ArrayList<ArrayList<Player>> balancedTeams = balanced(playerList);
 		finalPrint(balancedTeams);
 		simplePrint(balancedTeams);
@@ -47,9 +61,35 @@ public class balancingSystem{
 		this(0);
 	}
 
-	public static void main(String[] args){
+	public static void main(String[] args){ // Skicka in Data.json
+		System.out.println("Starting TeamMaker");
 		new balancingSystem(5,2,1);
 			
+	}
+
+	public void generateTeamCombs(ArrayList<Player> playersPlaying){
+		if(playersPlaying.size() != amountTeams * amountPlayers){
+			System.out.println("@generateTeamCombs, Somethings wrong, wrong teamsizes");
+		}
+
+		// Amount of combinations = om 2 lag: playersPlaying! / amountPlayers
+	}
+
+	public void activePlayers(ArrayList<Player> allPlayersList){
+		/*
+		JFrame frame = new JFrame();
+		// Gör components 
+		JContext context1 = new JContext();
+		JRadioButton button1 = new JRadioButton();
+		button1.setEventListener(new action(){
+			void actionPerformed(){
+				
+			}
+		});
+		JTextField text1 = new JTextField("");
+		context.add(button1);
+		frame.add();
+*/
 	}
 
 	public void readJSONData(String json){ // Static or not?
@@ -353,24 +393,17 @@ public class balancingSystem{
 
 	public void simplePrint(ArrayList<ArrayList<Player>> list){
 		StringBuilder sb = new StringBuilder();
-		sb.append("Team 1: ");
-		for(int i = 0; i < amountPlayers; i++){
-			Player p = list.get(0).get(i);
-			sb.append(p.getUserName());
-			if(i < amountPlayers-1){
-				sb.append(", ");
+		for(int j = 0; j < amountTeams; j++){
+			sb.append("Team "+ (j+1)+": ");
+			for(int i = 0; i < amountPlayers; i++){
+				Player p = list.get(j).get(i);
+				sb.append(p.getUserName());
+				if(i < amountPlayers-1){
+					sb.append(", ");
+				}
 			}
+			sb.append("\n");
 		}
-		sb.append("\n");
-		sb.append("Team 2: ");
-		for(int i = 0; i < amountPlayers; i++){
-			Player p = list.get(1).get(i);
-			sb.append(p.getUserName());
-			if(i < amountPlayers-1){
-				sb.append(", ");
-			}
-		}
-		sb.append("\n");
 		io.println(sb.toString());
 	}
 

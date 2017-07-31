@@ -21,6 +21,13 @@ public class Player{
 		this("", userName, csGo, dota, languageString);
 	}
 
+	public boolean comparePlayer(Player p){
+		if(p.getName.equals(this.name) && p.getUserName.equals(this.userName)){
+			return true;
+		}
+		return false;
+	}
+
 	public int getCS(){
 		return csGo;
 	}
