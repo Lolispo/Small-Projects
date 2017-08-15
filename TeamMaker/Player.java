@@ -3,11 +3,11 @@ import java.util.*;
 public class Player{
 	private String name;
 	private String userName;
-	private int csGo;
+	private int csGo; // 0 cs, 1 dota
 	private int dota;
 	private String[] languages; // Choose correct datastructure
 	private String languageString;
-	private int mmr;
+	private int[] mmr;
 
 	public Player(String name, String userName, int csGo, int dota, String languageString){
 		this.name = name;
@@ -16,6 +16,7 @@ public class Player{
 		this.dota = dota;
 		this.languageString = languageString;
 		languages = languageString.split(", ");		
+		mmr = new int[2]; // Amount of games with mmr
 		setInitRank();
 	}
 
@@ -26,32 +27,52 @@ public class Player{
 	public void setInitRank(){
 		switch(csGo){
 			case 1:
-				mmr = 700;
+				mmr[0] = 700;
 				break;
 			case 2: 
-				mmr = 800;
+				mmr[0] = 800;
 				break;
 			case 3: 
-				mmr = 900;
+				mmr[0] = 900;
 				break;
 			case 4: 
-				mmr = 1000;
+				mmr[0] = 1000;
 				break;
 			case 5: 
-				mmr = 1100;
+				mmr[0] = 1100;
 				break;
 			case 6: 
-				mmr = 1200;
+				mmr[0] = 1200;
+				break;
+		}
+		switch(dota){
+			case 1:
+				mmr[1] = 700;
+				break;
+			case 2: 
+				mmr[1] = 800;
+				break;
+			case 3: 
+				mmr[1] = 900;
+				break;
+			case 4: 
+				mmr[1] = 1000;
+				break;
+			case 5: 
+				mmr[1] = 1100;
+				break;
+			case 6: 
+				mmr[1] = 1200;
 				break;
 		}
 	}
 
-	public void setMmr(int mmr){
-		this.mmr = mmr;
+	public void setMmr(int game, int mmr){
+		this.mmr[game] = mmr;
 	}
 
-	public int getMmr(){
-		return this.mmr;
+	public int getMmr(int game){
+		return this.mmr[game];
 	}
 
 	public boolean comparePlayer(Player p){
@@ -93,6 +114,15 @@ public class Player{
 
 	public String toString(){
 		return (userName + " (" + name+ ") : CS:GO = "+csGo +", dota = "+dota + ". Lang = " +languageString);
+	}
+
+	public static String getActivePlayers(ArrayList<Player> activePlayers){
+		StringBuilder sb = new StringBuilder();
+		sb.append("Players plaing: ");
+		for(Player p : activePlayers){
+			sb.append(p.getUserName()+ " ");
+		}
+		return sb.toString();
 	}
 
 }

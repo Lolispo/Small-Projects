@@ -31,11 +31,18 @@ public class balancingSystem{
 	private Kattio io;
 
 	private ArrayList<Player> playerList; // List of all players total #TODO Currently also used as active
-	// private ArrayList<Player> activePlayers; // Implement me?
+	private ArrayList<Player> activePlayers; // Implement me?
 
 	private ArrayList<TeamCombination> teamCombs; // All teamcombinations for active players 
 	private ArrayList<TeamCombination> playedTeamCombs; // Used teamcombinations
 
+//			ArrayList<ArrayList<Player>> inhouseBalancedTeams = inhouseBalance(newPlayers);
+			 // #TODO VÄLJ MED KNAPPAR
+			// Old - print to check it's balance - use simple and final
+			/*
+			ArrayList<ArrayList<Player>> balancedTeams = balanced(playerList);
+			ArrayList<ArrayList<Player>> randomTeams = randomSeparation(playerList);
+			*/
 
 	// Gör om så att man inte väljer game by default, man gör det i GUI
 	balancingSystem(int teams, int players, int game){ // Remove except
@@ -59,7 +66,8 @@ public class balancingSystem{
 		int i = 0;
 		do{
 			//Should choose activeplayers
-			activePlayers(playerList); // #TODO
+			this.activePlayers = activePlayers(this.playerList); // #TODO
+
 			boolean newPlayers;
 			if(i == 0){ // # TODO ^activePlayers
 				newPlayers = true;
@@ -68,34 +76,46 @@ public class balancingSystem{
 			}
 			
 			// Get balance
-			ArrayList<ArrayList<Player>> inhouseBalancedTeams = inhouseBalance(newPlayers);
-			 // #TODO VÄLJ MED KNAPPAR
-			// Old - print to check it's balance - use simple and final
-			/*
-			ArrayList<ArrayList<Player>> balancedTeams = balanced(playerList);
-			ArrayList<ArrayList<Player>> randomTeams = randomSeparation(playerList);
-			*/
+			String[] buttons = { "Inhouse balance", "balanced (old)", "randomSep (old)" };
+	    	int rc = 0;
+	    	//rc = JOptionPane.showOptionDialog(null, Player.getActivePlayers(this.activePlayers), "Which way to balance?",
+	        //JOptionPane.PLAIN_MESSAGE, 0, null, buttons, buttons[2]);	
+			ArrayList<ArrayList<Player>> balancedTeams;
+			switch(rc){
+				case 0:
+					System.out.println("inhouseBalanceChosen");
+					balancedTeams = inhouseBalance(playerList, newPlayers);
+					break;
+				case 1:
+					System.out.println("balanced(old)chosen");
+					balancedTeams = balanced(playerList);
+					break;
+				case 2:
+					System.out.println("random(old)chosen");
+					balancedTeams = randomSeparation(playerList);
+					break;
+				default: 
+					balancedTeams = inhouseBalance(playerList, newPlayers);
+			}
 
-			// Use inhouseBalancedTeams
 			// Choose winner
-			if(!chooseWinner(inhouseBalancedTeams)){
+			if(!chooseWinner(balancedTeams)){
 				continue;
 			}
 
 			// Should print result
-			finalPrint(inhouseBalancedTeams);
-			simplePrint(inhouseBalancedTeams);
+			finalPrint(balancedTeams);
+			simplePrint(balancedTeams);
 			i++;
 		}while(i < amountOfTeamCombs);
-	
-		System.out.println("---------------------------");
+	/*
 		System.out.println("---------------------------");
 		System.out.println("Played Games: ");
 		System.out.println("");
 		for(TeamCombination ptc : playedTeamCombs){
 			finalPrint(ptc.getTeamCombination());
 			simplePrint(ptc.getTeamCombination());
-		}
+		}*/
 		io.close();
 	}
 
@@ -110,33 +130,31 @@ public class balancingSystem{
 
 	public static void main(String[] args){ // Skicka in Data.json
 		System.out.println("Starting TeamMaker");
-		new balancingSystem(1); // Dota Skill
+		String[] buttons = { "CS", "Dota", "Generic Game"};
+    	int rc = JOptionPane.showOptionDialog(null, "Games available: CsGo and Dota", "Which game?",
+        JOptionPane.PLAIN_MESSAGE, 0, null, buttons, buttons[2]);	
+		if(rc >= 2){ // Current default doto
+			rc = 1;
+		}
+		new balancingSystem(rc); 
 			
 	}
 
 	public boolean chooseWinner(ArrayList<ArrayList<Player>> chosenTeams){
         String[] buttons = { "Team 1", "Team 2", "Didn't Play" };
-        StringBuilder sb = new StringBuilder();
-        sb.append("Team 1: ");
     	int rc = JOptionPane.showOptionDialog(null, currentTeamComb.toStringShort(), "Who won?",
-        JOptionPane.PLAIN_MESSAGE, 0, null, buttons, buttons[2]);	
+        JOptionPane.INFORMATION_MESSAGE, 0, null, buttons, buttons[2]);	
 
     	System.out.println("--------------------------");
 		System.out.println("Teams BEFORE rating change");
 		finalPrint(chosenTeams);
 		switch(rc){
 			case 0:
-				updateRating(chosenTeams.get(0), chosenTeams.get(1));
-				System.out.println("Teams AFTER rating change");
-				finalPrint(chosenTeams);
-				System.out.println("--------------------------");
+				updateRating(true);
 				playedTeamCombs.add(currentTeamComb);
 				return true;
 			case 1: 
-				updateRating(chosenTeams.get(1), chosenTeams.get(0));
-				System.out.println("Teams AFTER rating change");
-				finalPrint(chosenTeams);
-				System.out.println("--------------------------");
+				updateRating(false);
 				playedTeamCombs.add(currentTeamComb);
 	    		return true;
 	    	case 2: 
@@ -146,55 +164,38 @@ public class balancingSystem{
         }		     		
 	}
 
-	public void updateRating(ArrayList<Player> winningTeam, ArrayList<Player> losingTeam){
-
-
-		// Calc total mmr for both teams
-		int winTeamTotal = 0;
-		for(Player p : winningTeam){
-			winTeamTotal += p.getMmr();
+	public void updateRating(boolean team1Won){
+		int change = currentTeamComb.getMMRChange(team1Won);
+		ArrayList<Player> winningTeam;
+		ArrayList<Player> losingTeam;
+		if(team1Won){
+			winningTeam = currentTeamComb.getTeamCombination().get(0);
+			losingTeam = currentTeamComb.getTeamCombination().get(1);
+		}else{
+			winningTeam = currentTeamComb.getTeamCombination().get(1);
+			losingTeam = currentTeamComb.getTeamCombination().get(0);
 		}
-		int loseTeamTotal = 0;
-		for(Player p : losingTeam){
-			loseTeamTotal += p.getMmr();
-		}
-
-		// Calc average
-		int winTeamAvgMMR = winTeamTotal / winningTeam.size();
-		int loseTeamAvgMMR = loseTeamTotal / losingTeam.size();
-		
-		// Compare avg between teams
-		// Get some connection between how much you win per game with how fair the game was
-		int ratingChange = 25;
-		int foo = 200;
-		// difference
-		int diff = 100 - winTeamAvgMMR + loseTeamAvgMMR;
-		// diff > 100 -> underdog, diff < 100 -> expected
-		// #TODO, Man kan förlora rating när man vinner atm xd, gör så att man behöver stor skillnad i avg för stor skillnad från +-25
-		// Fixa max 50 min 5
-		System.out.println("@bala. updateRating Rating to Change : " + (int)Math.floor(ratingChange * diff / 100) + ", diff = " + diff);
 		for(Player p : winningTeam){
-			p.setMmr(p.getMmr() + (int)Math.floor(ratingChange * diff / 100));
+			p.setMmr(game, p.getMmr(game) + change);
 		}
 		for(Player p : losingTeam){
-			p.setMmr(p.getMmr() - (int)Math.floor(ratingChange * diff / 100));
+			p.setMmr(game, p.getMmr(game) - change);
 		}
-
 	}
 
-	public ArrayList<ArrayList<Player>> inhouseBalance(boolean newPlayers){
+	public ArrayList<ArrayList<Player>> inhouseBalance(ArrayList<Player> players, boolean newPlayers){
 		if(newPlayers){ // Handles first time and when different players are playing
 			// Should make combinations
-			generateTeamCombs(playerList); // change to active Players
+			generateTeamCombs(players); // change to active Players
 			// Should give values for all combinations
 			for(TeamCombination tempTeamComb : teamCombs){
-				tempTeamComb.compareBoth(this.playedTeamCombs, this.game);
+				tempTeamComb.calcSkill(this.game);
 			}
 		}
-		else{
-			for(TeamCombination tempTeamComb : teamCombs){
-				tempTeamComb.calculatePrev(this.playedTeamCombs, this.game);
-			}
+		for(TeamCombination tempTeamComb : teamCombs){
+			tempTeamComb.calcMMR(this.game);
+			tempTeamComb.calcTeamSimilar(this.playedTeamCombs, this.game);
+			tempTeamComb.calcScore();
 		}
 		// Should choose the best chosen
 		int bestSuitedTeamComb = Integer.MAX_VALUE;
@@ -225,9 +226,9 @@ public class balancingSystem{
 			Random r = new Random();
 			chosenTeamComb = chosenTeamCombs.get(r.nextInt(chosenTeamCombs.size()));
 		}
+		chosenTeamComb.calcMMRChange(this.game);
 
-		System.out.println("||||||||||||||||||||||||||||||||||||||||");
-		System.out.println();
+		System.out.println("---------------------------------\n");
 		System.out.println("Chosen team: ");
 		System.out.println(chosenTeamComb.toString(this.game));
 
@@ -286,11 +287,13 @@ public class balancingSystem{
 		return bothTeams;
 	}
 
-	public void activePlayers(ArrayList<Player> allPlayersList){
+	// #TODO activePlayers
+	public ArrayList<Player> activePlayers(ArrayList<Player> allPlayersList){
+		
 		/*
 		JFrame frame = new JFrame();
 		// Gör components 
-		JContext context1 = new JContext();
+		JContainer container1 = new JContainer();
 		JRadioButton button1 = new JRadioButton();
 		button1.setEventListener(new action(){
 			void actionPerformed(){
@@ -298,9 +301,10 @@ public class balancingSystem{
 			}
 		});
 		JTextField text1 = new JTextField("");
-		context.add(button1);
+		container1.add(button1);
 		frame.add();
 */
+		return allPlayersList;
 	}
 
 	public void readJSONData(String json){ // Static or not?
@@ -309,7 +313,7 @@ public class balancingSystem{
 		JsonArray players = Json.parse(json).asArray();
 
 		// Choosing players
-
+		// UPDATE THIS WITH NEW JSON INFO  https://docs.google.com/spreadsheets/d/1NNavWEzEf9gx3hBzh0vpQ_5pn7kjievQyiXA3PRhU34/edit#gid=31358158
 		for(JsonValue item : players){ 			
 			String name = item.asObject().getString("name", "Unknown Name");
   			String userName = item.asObject().getString("username", "Unknown Item");
@@ -337,16 +341,28 @@ public class balancingSystem{
 			case "Supreme":
 				value = 5;
 				break;
-			case "LEM":
+			case "Legendary Eagle Master":
 				value = 4;
 				break;
-			case "DMG/LE":
+			case "Legendary Eagle":
+			case "DMG":
 				value = 3;
 				break;
-			case "GoldNova/AK":
+			case "Master Guardian Elite":
+			case "Master Guardian 2":
+			case "Master Guardian 1":
+			case "Gold Nova 4":
+			case "Gold Nova 3":
+			case "Gold Nova 2":
+			case "Gold Nova 1":
 				value = 2;
 				break;
-			case "Silver/Unranked":
+			case "Silver Elite Master":
+			case "Silver Elite":
+			case "Silver 4":
+			case "Silver 3":
+			case "Silver 2":
+			case "Silver 1":
 			default:
 				value = 1;
 				break;
@@ -435,9 +451,9 @@ public class balancingSystem{
 				for(int j = 0; j < 15-s.length(); j++) // Space adding foor loop it seems
 					sb.append(" ");
 				System.out.println("Team "+(team+1)+": Player " +(i+1)+ ": "+ 
-					sb.toString() + "Skill-level: " +p.getGameSkill(game) + " MMR: "+ p.getMmr());
+					sb.toString() + "Skill-level: " +p.getGameSkill(game) + " MMR: "+ p.getMmr(this.game));
 				teamTotal[team] += p.getGameSkill(game);
-				mmrTotal[team] += p.getMmr();
+				mmrTotal[team] += p.getMmr(this.game);
 				i++;
 			}
 			team++;
@@ -631,7 +647,9 @@ public class balancingSystem{
 		// Rebuild Teams from tiers
 		// 		Handle edge cases such as odd numbers 
 
-
+	/*
+		Seperates the incoming group of players in two teams on random, with no seeding
+	*/
 	public ArrayList<ArrayList<Player>> randomSeparation(ArrayList<Player> players){
 		
 		Collections.shuffle(players);
@@ -642,6 +660,8 @@ public class balancingSystem{
 		for(int i = 0; i < players.size(); i++){
 			list.get(i % amountTeams).add(players.get(i));
 		}
+		//TeamCombination tempTeamComb = new TeamCombination(getBothTeams(playersPlaying, playersChosenNum)));
+		//this.currentTeamComb = tempTeamComb;
 		return list;
 	}
 }

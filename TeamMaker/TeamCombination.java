@@ -7,6 +7,9 @@ public class TeamCombination{
 	private int rangePrevTeams;
 	private int amountPlayed;
 	private int skillDiff;
+	private int mmrDiff;
+	private int mmrChange1; // team1 stakes: +mmrChange1, -mmrChange2
+	private int mmrChange2;
 	private int comparableScore;
 
 	public int skillImpactFactor = 10;
@@ -34,18 +37,20 @@ public class TeamCombination{
 	}
 
 	// Calculates Skillcomparison between teams and comparison how previous teams looked
-	// #TODO separera så inte calculatePrev ligger här, eftersom den inte ska räknas ut på första körningen iaf
+	// #TODO separera så inte calcTeamSimilar ligger här, eftersom den inte ska räknas ut på första körningen iaf
 		// Måste flytta var comprabable score beräknas, just nu i calcPRev
-	// @param prevTeamCombs: Previous played games' teamcombinations
-	// 	game: index for game
-	public void compareBoth(ArrayList<TeamCombination> prevTeamCombs, int game){
-		//System.out.println("@TeamCombination @compareBoth");
-		ArrayList<ArrayList<Player>> currentTeams = this.teams;
-		this.skillDiff = compareSkill(currentTeams, game);
-		calculatePrev(prevTeamCombs, game);
+	
+	// @param	game: index for game
+	public void calcSkill(int game){
+		this.skillDiff = compareSkill(this.teams, game);
 	}
 
-	public void calculatePrev(ArrayList<TeamCombination> prevTeamCombs, int game){
+	public void calcMMR(int game){
+		this.mmrDiff = compareMMR(this.teams, game);
+	}
+
+	// @param prevTeamCombs: Previous played games' teamcombinations
+	public void calcTeamSimilar(ArrayList<TeamCombination> prevTeamCombs, int game){
 		ArrayList<ArrayList<Player>> currentTeams = this.teams;
 		this.amountPlayed = prevTeamCombs.size(); // Amount of games played currently
 		if(prevTeamCombs.isEmpty()){
@@ -53,8 +58,64 @@ public class TeamCombination{
 		}else{
 			this.rangePrevTeams = compareToPrevCombs(prevTeamCombs, currentTeams); // Sets the value of how close this team iteration in comparison to previous ones
 		}
-		this.comparableScore = this.rangePrevTeams + this.skillDiff * this.skillImpactFactor; // 
+	}
+
+	// Calcs the score for comparison . #Todo MMR instead of skill
+	public void calcScore(){
+		this.comparableScore = this.rangePrevTeams + this.mmrDiff;//this.skillDiff * this.skillImpactFactor;
 		//printTeamComb(game);
+	}
+
+	public void calcMMRChange(int game){
+		
+		// Calc total mmr for both teams
+		int team1Total = 0;
+		ArrayList<Player> team1 = getTeamCombination().get(0);
+		ArrayList<Player> team2 = getTeamCombination().get(1);
+
+		for(Player p : team1){
+			team1Total += p.getMmr(game);
+		}
+		int team2Total = 0;
+		for(Player p : team2){
+			team2Total += p.getMmr(game);
+		}
+
+		// Calc average
+		int team1AvgMMR = team1Total / team1.size();
+		int team2AvgMMR = team2Total / team2.size();
+		
+		// Compare avg between teams
+		// Get some connection between how much you win per game with how fair the game was
+		int ratingChange = 25;
+		int foo = 200;
+		// difference
+		int diff1 = 100 - team1AvgMMR + team2AvgMMR; // Team 1 wins
+		int diff2 = 100 - team2AvgMMR + team1AvgMMR; // Team 2 wins
+		// diff > 100 -> underdog, diff < 100 -> expected
+		// Fixa max 50 min 5
+		int change1 = (int)Math.floor(ratingChange * diff1 / 100);
+		int change2 = (int)Math.floor(ratingChange * diff2 / 100);
+		if(change1 < 5){
+			change1 = 5;
+		}else if(change1 > 50){
+			change1 = 50;
+		}
+		if(change2 < 5){
+			change2 = 5;
+		}else if(change2 > 50){
+			change2 = 50;
+		}
+		//System.out.println("@teamComb. calcMmr Rating to Change : " + change + ", diff = " + diff);
+		this.mmrChange1 = change1;
+		this.mmrChange2 = change2;
+	}
+
+	public int getMMRChange(boolean team1Won){
+		if(team1Won){
+			return this.mmrChange1;
+		}
+		return this.mmrChange2;
 	}
 
 	// Compares the total skill level between both teams and sets skilldiff field to it
@@ -70,6 +131,23 @@ public class TeamCombination{
 		int sum = 0;
 		for(Player p : team){
 			sum += p.getGameSkill(game);
+		}
+		return sum;
+	}
+
+	// Compares the total mmr between both teams and sets skilldiff field to it
+	public int compareMMR(ArrayList<ArrayList<Player>> currentTeams, int game){
+		int team1Skill = sumTeamMMR(currentTeams.get(0), game) / 5;
+		int team2Skill = sumTeamMMR(currentTeams.get(1), game) / 5;
+		return Math.abs(team1Skill-team2Skill);
+
+	}
+
+	// Calcs total mmr for game chosen and returns the total
+	public int sumTeamMMR(ArrayList<Player> team, int game){
+		int sum = 0;
+		for(Player p : team){
+			sum += p.getMmr(game);
 		}
 		return sum;
 	}
@@ -152,17 +230,19 @@ public class TeamCombination{
 		int mmrTotal;
 		int i = 1;
 		for(ArrayList<Player> team : currentTeams){
-			teamSB = new StringBuilder();
 			mmrTotal = 0;
+			teamSB = new StringBuilder();
 			for(Player p : team){
 				teamSB.append(p.getUserName() + " ");
-				mmrTotal += p.getMmr();
+				mmrTotal += p.getMmr(game);
 			}
 			sb.append("Team " +i +": " + teamSB.toString() + ". Avg MMR = " + (mmrTotal / 5)+ "\n");
 			i++;
 		}
 		sb.append("Skill diff: " + this.skillDiff + "\n");
-		sb.append("Compared to prev teamCombs (First game = 0) : " + this.rangePrevTeams + "\n");
+		sb.append("TeamPlayerComparison: " + this.rangePrevTeams + "\n");
+		sb.append("MMR diff: " + this.mmrDiff + "\n");
+		sb.append("MMR at stake: \n\tTeam 1: +" + this.mmrChange1 + "/-"+ this.mmrChange2 + " \n\tTeam 2: +" + this.mmrChange2 + "/-"+ this.mmrChange1 +"\n");
 		sb.append("SCORE: " + this.comparableScore + " (Skill factor: " + this.skillImpactFactor+")\n");
 		sb.append("----------------------------\n");
 		return sb.toString();
