@@ -12,7 +12,11 @@ import javax.swing.*;
 	beräkna lägsta siffran av skill level jämförelse
 	efter ett game spelat - beräkna jämförelse med lagen, få ut nya lägsta
 
-
+	Lägg till eget ELO system, så man kan ha många olika sätt att välja balanserade lag när man valt active players
+		Elo balance
+		Inhouse balance = based on skill and prev teams
+		Only rank balance = First iteration = balanced(playerList);
+		Random balance = done? = randomSeparation(playerList)
 */
 
 public class balancingSystem{
@@ -20,19 +24,25 @@ public class balancingSystem{
 	private int amountTeams;
 	private int amountPlayers;
 	private int game; // 0 = cs, 1 = dota
+	private int amountOfTeamCombs = 5;
+	private TeamCombination currentTeamComb;
 
 	private Random r;
 	private Kattio io;
 
-	private ArrayList<Player> playerList;
+	private ArrayList<Player> playerList; // List of all players total #TODO Currently also used as active
+	// private ArrayList<Player> activePlayers; // Implement me?
 
-	private ArrayList<TeamCombination> teamCombs;
+	private ArrayList<TeamCombination> teamCombs; // All teamcombinations for active players 
+	private ArrayList<TeamCombination> playedTeamCombs; // Used teamcombinations
+
 
 	// Gör om så att man inte väljer game by default, man gör det i GUI
-	balancingSystem(int teams, int players, int game){
+	balancingSystem(int teams, int players, int game){ // Remove except
 		this.amountTeams = teams; // Amount of teams
 		this.amountPlayers = players; // PER TEAM
 		this.game = game;
+		//this.amountOfTeamCombs = 2; // Testing, default value 5
 
 		r = new Random();
 		playerList = new ArrayList<Player>();
@@ -42,14 +52,50 @@ public class balancingSystem{
 		while(io.hasMoreTokens()){
 			sb.append(io.getWord());
 		}
-		readJSONData(sb.toString());
-		activePlayers(playerList);
-		//ArrayList<ArrayList<Player>> randomTeams = randomSeparation(playerList);
-		//print(randomTeams);
+		readJSONData(sb.toString()); // Init all players to field "playerList"
 		teamCombs = new ArrayList<TeamCombination>();
-		ArrayList<ArrayList<Player>> balancedTeams = balanced(playerList);
-		finalPrint(balancedTeams);
-		simplePrint(balancedTeams);
+		playedTeamCombs = new ArrayList<TeamCombination>();
+
+		int i = 0;
+		do{
+			//Should choose activeplayers
+			activePlayers(playerList); // #TODO
+			boolean newPlayers;
+			if(i == 0){ // # TODO ^activePlayers
+				newPlayers = true;
+			}else{
+				newPlayers = false;
+			}
+			
+			// Get balance
+			ArrayList<ArrayList<Player>> inhouseBalancedTeams = inhouseBalance(newPlayers);
+			 // #TODO VÄLJ MED KNAPPAR
+			// Old - print to check it's balance - use simple and final
+			/*
+			ArrayList<ArrayList<Player>> balancedTeams = balanced(playerList);
+			ArrayList<ArrayList<Player>> randomTeams = randomSeparation(playerList);
+			*/
+
+			// Use inhouseBalancedTeams
+			// Choose winner
+			if(!chooseWinner(inhouseBalancedTeams)){
+				continue;
+			}
+
+			// Should print result
+			finalPrint(inhouseBalancedTeams);
+			simplePrint(inhouseBalancedTeams);
+			i++;
+		}while(i < amountOfTeamCombs);
+	
+		System.out.println("---------------------------");
+		System.out.println("---------------------------");
+		System.out.println("Played Games: ");
+		System.out.println("");
+		for(TeamCombination ptc : playedTeamCombs){
+			finalPrint(ptc.getTeamCombination());
+			simplePrint(ptc.getTeamCombination());
+		}
 		io.close();
 	}
 
@@ -59,12 +105,135 @@ public class balancingSystem{
 
 	balancingSystem(){ // Consider adding more constructors later
 		this(0);
+
 	}
 
 	public static void main(String[] args){ // Skicka in Data.json
 		System.out.println("Starting TeamMaker");
-		new balancingSystem(5,2,1);
+		new balancingSystem(1); // Dota Skill
 			
+	}
+
+	public boolean chooseWinner(ArrayList<ArrayList<Player>> chosenTeams){
+        String[] buttons = { "Team 1", "Team 2", "Didn't Play" };
+        StringBuilder sb = new StringBuilder();
+        sb.append("Team 1: ");
+    	int rc = JOptionPane.showOptionDialog(null, currentTeamComb.toStringShort(), "Who won?",
+        JOptionPane.PLAIN_MESSAGE, 0, null, buttons, buttons[2]);	
+
+    	System.out.println("--------------------------");
+		System.out.println("Teams BEFORE rating change");
+		finalPrint(chosenTeams);
+		switch(rc){
+			case 0:
+				updateRating(chosenTeams.get(0), chosenTeams.get(1));
+				System.out.println("Teams AFTER rating change");
+				finalPrint(chosenTeams);
+				System.out.println("--------------------------");
+				playedTeamCombs.add(currentTeamComb);
+				return true;
+			case 1: 
+				updateRating(chosenTeams.get(1), chosenTeams.get(0));
+				System.out.println("Teams AFTER rating change");
+				finalPrint(chosenTeams);
+				System.out.println("--------------------------");
+				playedTeamCombs.add(currentTeamComb);
+	    		return true;
+	    	case 2: 
+		    	return false;
+		    default: 
+		    	return false;
+        }		     		
+	}
+
+	public void updateRating(ArrayList<Player> winningTeam, ArrayList<Player> losingTeam){
+
+
+		// Calc total mmr for both teams
+		int winTeamTotal = 0;
+		for(Player p : winningTeam){
+			winTeamTotal += p.getMmr();
+		}
+		int loseTeamTotal = 0;
+		for(Player p : losingTeam){
+			loseTeamTotal += p.getMmr();
+		}
+
+		// Calc average
+		int winTeamAvgMMR = winTeamTotal / winningTeam.size();
+		int loseTeamAvgMMR = loseTeamTotal / losingTeam.size();
+		
+		// Compare avg between teams
+		// Get some connection between how much you win per game with how fair the game was
+		int ratingChange = 25;
+		int foo = 200;
+		// difference
+		int diff = 100 - winTeamAvgMMR + loseTeamAvgMMR;
+		// diff > 100 -> underdog, diff < 100 -> expected
+		// #TODO, Man kan förlora rating när man vinner atm xd, gör så att man behöver stor skillnad i avg för stor skillnad från +-25
+		// Fixa max 50 min 5
+		System.out.println("@bala. updateRating Rating to Change : " + (int)Math.floor(ratingChange * diff / 100) + ", diff = " + diff);
+		for(Player p : winningTeam){
+			p.setMmr(p.getMmr() + (int)Math.floor(ratingChange * diff / 100));
+		}
+		for(Player p : losingTeam){
+			p.setMmr(p.getMmr() - (int)Math.floor(ratingChange * diff / 100));
+		}
+
+	}
+
+	public ArrayList<ArrayList<Player>> inhouseBalance(boolean newPlayers){
+		if(newPlayers){ // Handles first time and when different players are playing
+			// Should make combinations
+			generateTeamCombs(playerList); // change to active Players
+			// Should give values for all combinations
+			for(TeamCombination tempTeamComb : teamCombs){
+				tempTeamComb.compareBoth(this.playedTeamCombs, this.game);
+			}
+		}
+		else{
+			for(TeamCombination tempTeamComb : teamCombs){
+				tempTeamComb.calculatePrev(this.playedTeamCombs, this.game);
+			}
+		}
+		// Should choose the best chosen
+		int bestSuitedTeamComb = Integer.MAX_VALUE;
+		ArrayList<TeamCombination> chosenTeamCombs = new ArrayList<TeamCombination>();
+		for(TeamCombination tempTeamComb : teamCombs){
+			int tempScore = tempTeamComb.getScore();
+			if(tempScore < bestSuitedTeamComb){
+				bestSuitedTeamComb = tempScore;
+				chosenTeamCombs = new ArrayList<TeamCombination>();
+				chosenTeamCombs.add(tempTeamComb);
+			}else if(tempScore == bestSuitedTeamComb && chosenTeamCombs.isEmpty()){ // If equal, favorize fairer in skill over previous games - good / bad, need testing
+				if(tempTeamComb.getSkillDiff() < chosenTeamCombs.get(0).getSkillDiff()){
+					chosenTeamCombs = new ArrayList<TeamCombination>();
+					chosenTeamCombs.add(tempTeamComb);
+				}else{
+					// Add for randomed result when same
+					chosenTeamCombs.add(tempTeamComb);
+				}
+			}
+		}
+
+		TeamCombination chosenTeamComb;
+		if(chosenTeamCombs.size() == 1){
+			chosenTeamComb = chosenTeamCombs.get(0);
+		}else{
+			// Random from equal seeds
+			System.out.println(chosenTeamCombs.size() + " teams were equal, randoming ...");
+			Random r = new Random();
+			chosenTeamComb = chosenTeamCombs.get(r.nextInt(chosenTeamCombs.size()));
+		}
+
+		System.out.println("||||||||||||||||||||||||||||||||||||||||");
+		System.out.println();
+		System.out.println("Chosen team: ");
+		System.out.println(chosenTeamComb.toString(this.game));
+
+		// We have the chosen combination - add to correct spots
+		this.currentTeamComb = chosenTeamComb;
+		return chosenTeamComb.getTeamCombination();
 	}
 
 	public void generateTeamCombs(ArrayList<Player> playersPlaying){
@@ -73,6 +242,48 @@ public class balancingSystem{
 		}
 
 		// Amount of combinations = om 2 lag: playersPlaying! / amountPlayers
+
+
+		// Straight forward method in getting all permutations of 10 players in 5 teams, with duplicates
+		for (int i = 0; i < playersPlaying.size(); i++) {
+		    for (int j = i + 1; j < playersPlaying.size(); j++) {
+		    	for (int k = j+1; k < playersPlaying.size(); k++) {
+		    		for (int l = k+1; l < playersPlaying.size(); l++) {
+		   				for (int m = l+1; m < playersPlaying.size(); m++) {
+							int[] playersChosenNum = {i, j, k, l, m};
+							teamCombs.add(new TeamCombination(getBothTeams(playersPlaying, playersChosenNum)));
+		   				}
+		   			}
+		   		}
+		    }
+		}
+	}
+
+	public ArrayList<ArrayList<Player>> getBothTeams(ArrayList<Player> playersPlaying, int[] playersChosenNum){
+		//System.out.println("-------- Making Team Comb ---------");
+		ArrayList<Player> playersChosenTeam = new ArrayList<Player>();
+		for(int i = 0; i < playersChosenNum.length; i++){ // Assumes playersPlaying = 10 #Check
+			playersChosenTeam.add(playersPlaying.get(playersChosenNum[i]));
+			//System.out.println("Team 1: " + playersChosenNum[i]);
+		}
+		ArrayList<Player> playersOtherTeam = new ArrayList<Player>();
+		for(int i = 0; i < playersPlaying.size(); i++){ // Assumes playersPlaying = 10 #Check
+			boolean secondTeam = true;
+			for(int j = 0; j < playersChosenNum.length; j++){
+				if(i == playersChosenNum[j]){
+					secondTeam = false;
+				}
+			}
+			if(secondTeam){
+				playersOtherTeam.add(playersPlaying.get(i));
+				//System.out.println("Team 2: " + i);
+			}
+		}
+		ArrayList<ArrayList<Player>> bothTeams = new ArrayList<ArrayList<Player>>();
+		bothTeams.add(playersChosenTeam);
+		bothTeams.add(playersOtherTeam);
+		//System.out.println("--------------------------");
+		return bothTeams;
 	}
 
 	public void activePlayers(ArrayList<Player> allPlayersList){
@@ -170,6 +381,73 @@ public class balancingSystem{
 		return value;
 	}
 
+
+	public String stringTeam(ArrayList<Player> list){
+		StringBuilder sb = new StringBuilder();
+		sb.append("{");
+		for(Player p : list){
+			sb.append(p.getUserName() + "("+p.getGameSkill(game)+"),");
+		}
+		sb.append("}");
+		return sb.toString();
+	}
+
+	public String stringTeams(ArrayList<ArrayList<Player>> list){
+		StringBuilder sb = new StringBuilder();
+		sb.append("[");
+		for(ArrayList<Player> innerList : list){
+			sb.append("{");
+			for(Player p : innerList){
+				sb.append(p.getUserName() + "("+p.getGameSkill(game)+"),");	
+			}
+			sb.append("}");
+		}
+		sb.append("]");
+		return sb.toString();
+	}	
+
+	public void simplePrint(ArrayList<ArrayList<Player>> list){
+		StringBuilder sb = new StringBuilder();
+		for(int j = 0; j < amountTeams; j++){
+			sb.append("Team "+ (j+1)+": ");
+			for(int i = 0; i < amountPlayers; i++){
+				Player p = list.get(j).get(i);
+				sb.append(p.getUserName());
+				if(i < amountPlayers-1){
+					sb.append(", ");
+				}
+			}
+			sb.append("\n");
+		}
+		System.out.println(sb.toString());
+	}
+
+	public void finalPrint(ArrayList<ArrayList<Player>> list){
+		int team = 0;
+		int[] teamTotal = new int[list.size()];
+		int[] mmrTotal = new int[list.size()];
+		for(ArrayList<Player> tempList : list){
+			int i = 0;
+			for(Player p : tempList){
+				String s = p.getUserName();
+				StringBuilder sb = new StringBuilder();
+				sb.append(s);
+				for(int j = 0; j < 15-s.length(); j++) // Space adding foor loop it seems
+					sb.append(" ");
+				System.out.println("Team "+(team+1)+": Player " +(i+1)+ ": "+ 
+					sb.toString() + "Skill-level: " +p.getGameSkill(game) + " MMR: "+ p.getMmr());
+				teamTotal[team] += p.getGameSkill(game);
+				mmrTotal[team] += p.getMmr();
+				i++;
+			}
+			team++;
+		}
+		int amountOfTeams = team;
+		for(int i = 0; i < amountOfTeams; i++){
+			System.out.println("Team "+(i+1) +" skill score total:  " + teamTotal[i] + ". Avg MMR: "+  (mmrTotal[i] / amountPlayers));	
+		}
+	}
+
 	public ArrayList<ArrayList<Player>> balanced(ArrayList<Player> players){
 
 		// Separate based on player skills
@@ -182,7 +460,7 @@ public class balancingSystem{
 		ArrayList<Player> fillers = new ArrayList<Player>();
 		
 		for(int i = 0; i < players.size(); i++){
-			switch(players.get(i).getGame(game)){
+			switch(players.get(i).getGameSkill(game)){
 				case 1:
 					skill1.add(players.get(i));
 					break;
@@ -205,7 +483,7 @@ public class balancingSystem{
 				default: 
 					fillers.add(players.get(i));
 			}
-			//System.out.println("Player "+players.get(i).getUserName()+", skill = "+players.get(i).getGame(game));
+			//System.out.println("Player "+players.get(i).getUserName()+", skill = "+players.get(i).getGameSkill(game));
 		}
 		// Make randomSeparation within these tiers
 		//ArrayList<ArrayList<Player>> s1, s2, s3, fi;
@@ -366,70 +644,4 @@ public class balancingSystem{
 		}
 		return list;
 	}
-
-	public String stringTeam(ArrayList<Player> list){
-		StringBuilder sb = new StringBuilder();
-		sb.append("{");
-		for(Player p : list){
-			sb.append(p.getUserName() + "("+p.getGame(game)+"),");
-		}
-		sb.append("}");
-		return sb.toString();
-	}
-
-	public String stringTeams(ArrayList<ArrayList<Player>> list){
-		StringBuilder sb = new StringBuilder();
-		sb.append("[");
-		for(ArrayList<Player> innerList : list){
-			sb.append("{");
-			for(Player p : innerList){
-				sb.append(p.getUserName() + "("+p.getGame(game)+"),");	
-			}
-			sb.append("}");
-		}
-		sb.append("]");
-		return sb.toString();
-	}
-
-	public void simplePrint(ArrayList<ArrayList<Player>> list){
-		StringBuilder sb = new StringBuilder();
-		for(int j = 0; j < amountTeams; j++){
-			sb.append("Team "+ (j+1)+": ");
-			for(int i = 0; i < amountPlayers; i++){
-				Player p = list.get(j).get(i);
-				sb.append(p.getUserName());
-				if(i < amountPlayers-1){
-					sb.append(", ");
-				}
-			}
-			sb.append("\n");
-		}
-		io.println(sb.toString());
-	}
-
-	public void finalPrint(ArrayList<ArrayList<Player>> list){
-		int team = 0;
-		int[] teamTotal = new int[list.size()];
-		for(ArrayList<Player> tempList : list){
-			int i = 0;
-			for(Player p : tempList){
-				String s = p.getUserName();
-				StringBuilder sb = new StringBuilder();
-				sb.append(s);
-				for(int j = 0; j < 15-s.length(); j++)
-					sb.append(" ");
-				io.println("Team "+(team+1)+": Player " +(i+1)+ ": "+ 
-					sb.toString() + "Skill-level: " +p.getGame(game));
-				teamTotal[team] += p.getGame(game);
-				i++;
-			}
-			team++;
-		}
-		int amountOfTeams = team;
-		for(int i = 0; i < amountOfTeams; i++){
-			io.println("Team "+(i+1) +" had " + teamTotal[i] + " total in skill rating.");	
-		}
-	}
-
-
 }
