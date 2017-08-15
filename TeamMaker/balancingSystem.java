@@ -79,7 +79,7 @@ public class balancingSystem{
 			String[] buttons = { "Inhouse balance", "balanced (old)", "randomSep (old)" };
 	    	int rc = 0;
 	    	//rc = JOptionPane.showOptionDialog(null, Player.getActivePlayers(this.activePlayers), "Which way to balance?",
-	        //JOptionPane.PLAIN_MESSAGE, 0, null, buttons, buttons[2]);	
+	        //JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, buttons, buttons[2]);	
 			ArrayList<ArrayList<Player>> balancedTeams;
 			switch(rc){
 				case 0:
@@ -108,6 +108,7 @@ public class balancingSystem{
 			simplePrint(balancedTeams);
 			i++;
 		}while(i < amountOfTeamCombs);
+	
 	/*
 		System.out.println("---------------------------");
 		System.out.println("Played Games: ");
@@ -115,7 +116,8 @@ public class balancingSystem{
 		for(TeamCombination ptc : playedTeamCombs){
 			finalPrint(ptc.getTeamCombination());
 			simplePrint(ptc.getTeamCombination());
-		}*/
+		}
+	*/
 		io.close();
 	}
 
@@ -132,7 +134,7 @@ public class balancingSystem{
 		System.out.println("Starting TeamMaker");
 		String[] buttons = { "CS", "Dota", "Generic Game"};
     	int rc = JOptionPane.showOptionDialog(null, "Games available: CsGo and Dota", "Which game?",
-        JOptionPane.PLAIN_MESSAGE, 0, null, buttons, buttons[2]);	
+        JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, buttons, buttons[2]);	
 		if(rc >= 2){ // Current default doto
 			rc = 1;
 		}
@@ -143,7 +145,7 @@ public class balancingSystem{
 	public boolean chooseWinner(ArrayList<ArrayList<Player>> chosenTeams){
         String[] buttons = { "Team 1", "Team 2", "Didn't Play" };
     	int rc = JOptionPane.showOptionDialog(null, currentTeamComb.toStringShort(), "Who won?",
-        JOptionPane.INFORMATION_MESSAGE, 0, null, buttons, buttons[2]);	
+        JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, buttons, buttons[2]);	
 
     	System.out.println("--------------------------");
 		System.out.println("Teams BEFORE rating change");
