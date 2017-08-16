@@ -1,0 +1,193 @@
+[
+    {
+        "timestamp": "2016-12-28T02:12:47.577Z",
+        "dota2": 2,
+        "csgo": 3,
+        "username": "Petter",
+        "languages": "English, Svenska",
+        "name": "Petter",
+        "currentCsgoRank": "Global",
+        "dota2MmrSolo": "4500-5500"
+    },
+    {
+        "timestamp": "2016-12-28T21:19:29.252Z",
+        "dota2": 3,
+        "csgo": 1,
+        "username": "spoder",
+        "languages": "English, Svenska",
+        "name": "Simon Wredh",
+        "currentCsgoRank": "Silver/Unranked",
+        "dota2MmrSolo": "6500+"
+    },
+    {
+        "timestamp": "2016-12-28T21:21:22.565Z",
+        "dota2": 2,
+        "csgo": 2,
+        "username": "Von Dobblen",
+        "languages": "English, Svenska",
+        "currentCsgoRank": "Supreme",
+        "dota2MmrSolo": "4500-5500"
+    },
+    {
+        "timestamp": "2016-12-28T21:21:45.336Z",
+        "dota2": 2,
+        "csgo": 0,
+        "username": "Gaggg",
+        "languages": "English, Svenska",
+        "name": "Jesper",
+        "currentCsgoRank": "Silver/Unranked",
+        "dota2MmrSolo": "2500-3500"
+    },
+    {
+        "timestamp": "2016-12-28T21:22:29.613Z",
+        "dota2": 3,
+        "csgo": 2,
+        "username": "Galnegunnar",
+        "languages": "English, Svenska",
+        "currentCsgoRank": "Gold Nova/AK",
+        "dota2MmrSolo": "4500-5500"
+    },
+    {
+        "timestamp": "2016-12-28T21:26:17.835Z",
+        "dota2": 3,
+        "csgo": 3,
+        "username": "Shuuna",
+        "languages": "English, Svenska",
+        "name": "David",
+        "currentCsgoRank": "Supreme",
+        "dota2MmrSolo": "3500-4500"
+    },
+    {
+        "timestamp": "2016-12-28T21:27:39.339Z",
+        "dota2": 1,
+        "csgo": 2,
+        "username": "Bob",
+        "languages": "English, Svenska",
+        "name": ":(",
+        "currentCsgoRank": "DMG/LE",
+        "dota2MmrSolo": "2500-3500"
+    },
+    {
+        "timestamp": "2016-12-28T21:31:09.800Z",
+        "dota2": 3,
+        "csgo": 1,
+        "username": "Smile",
+        "languages": "English, Norsk",
+        "name": "Jonas",
+        "currentCsgoRank": "Silver/Unranked",
+        "dota2MmrSolo": "5500-6500"
+    },
+    {
+        "timestamp": "2016-12-28T21:37:36.767Z",
+        "dota2": 3,
+        "csgo": 2,
+        "username": "WTHX",
+        "languages": "English, Svenska",
+        "name": "Johan G",
+        "currentCsgoRank": "DMG/LE",
+        "dota2MmrSolo": "4500-5500"
+    },
+    {
+        "timestamp": "2016-12-28T21:59:12.568Z",
+        "dota2": 3,
+        "csgo": 0,
+        "username": "Marius",
+        "languages": "English, Svenska, Norsk",
+        "currentCsgoRank": "Silver/Unranked",
+        "dota2MmrSolo": "5500-6500"
+    },
+    {
+        "timestamp": "2017-08-15T19:51:42.475Z",
+        "username": "Petter",
+        "languages": "English, Svenska",
+        "name": "Petter",
+        "currentCsgoRank": "Global",
+        "dota2MmrSolo": "4500-5500",
+        "csgoRankHighestInLastYear": "Global",
+        "csgoRankWhereYouConsiderYouBelongHonest": "Global",
+        "dota2MmrParty": "4500-5500"
+    },
+    {
+        "timestamp": "2017-08-15T20:02:29.330Z",
+        "username": "Petter",
+        "languages": "English, Svenska",
+        "name": "Petter",
+        "currentCsgoRank": "Global",
+        "dota2MmrSolo": "4500-5500",
+        "csgoRankHighestInLastYear": "Global",
+        "csgoRankWhereYouConsiderYouBelongHonest": "Global",
+        "dota2MmrParty": "4500-5500",
+        "dota2MmrWhereYouConsiderYouBelongHonest": "3500-4500"
+    },
+    {
+        "timestamp": "2017-08-15T20:25:18.662Z",
+        "username": "Medkit",
+        "languages": "English, Svenska",
+        "name": "Robin",
+        "currentCsgoRank": "Legendary Eagle Master",
+        "dota2MmrSolo": "0-2500 / Unranked",
+        "csgoRankHighestInLastYear": "Legendary Eagle Master",
+        "csgoRankWhereYouConsiderYouBelongHonest": "Legendary Eagle Master",
+        "dota2MmrParty": "2500-3500",
+        "dota2MmrWhereYouConsiderYouBelongHonest": "0-2500 / Unranked"
+    },
+    {
+        "timestamp": "2017-08-15T20:25:21.802Z",
+        "username": "Lacktjo",
+        "languages": "English, Svenska, Norsk, German",
+        "name": "Axel",
+        "currentCsgoRank": "Legendary Eagle",
+        "dota2MmrSolo": "2500-3500",
+        "csgoRankHighestInLastYear": "Legendary Eagle Master",
+        "csgoRankWhereYouConsiderYouBelongHonest": "Legendary Eagle Master",
+        "dota2MmrParty": "3500-4500",
+        "dota2MmrWhereYouConsiderYouBelongHonest": "3500-4500"
+    },
+    {
+        "timestamp": "2017-08-15T20:26:18.466Z",
+        "username": "Von Dobblen",
+        "languages": "English, Svenska",
+        "name": "David",
+        "currentCsgoRank": "Supreme",
+        "dota2MmrSolo": "3500-4500",
+        "csgoRankHighestInLastYear": "Supreme",
+        "csgoRankWhereYouConsiderYouBelongHonest": "Legendary Eagle Master",
+        "dota2MmrParty": "3500-4500",
+        "dota2MmrWhereYouConsiderYouBelongHonest": "3500-4500"
+    },
+    {
+        "timestamp": "2017-08-15T20:26:38.272Z",
+        "username": "Crab People",
+        "languages": "English, Svenska",
+        "name": "David Eriksson",
+        "currentCsgoRank": "Legendary Eagle Master",
+        "dota2MmrSolo": "3500-4500",
+        "csgoRankHighestInLastYear": "Global",
+        "csgoRankWhereYouConsiderYouBelongHonest": "Global",
+        "dota2MmrParty": "3500-4500",
+        "dota2MmrWhereYouConsiderYouBelongHonest": "4500-5500"
+    },
+    {
+        "timestamp": "2017-08-15T20:37:30.850Z",
+        "username": "The O",
+        "languages": "German, Finnish",
+        "currentCsgoRank": "Global",
+        "dota2MmrSolo": "6500+",
+        "csgoRankHighestInLastYear": "Silver 1",
+        "csgoRankWhereYouConsiderYouBelongHonest": "Gold Nova 3",
+        "dota2MmrParty": "0-2500 / Unranked",
+        "dota2MmrWhereYouConsiderYouBelongHonest": "3500-4500"
+    },
+    {
+        "timestamp": "2017-08-15T20:50:42.019Z",
+        "username": "Thebarrel",
+        "languages": "Svenska",
+        "name": "Martin",
+        "currentCsgoRank": "Global",
+        "dota2MmrSolo": "0-2500 / Unranked",
+        "csgoRankHighestInLastYear": "Global",
+        "csgoRankWhereYouConsiderYouBelongHonest": "Global",
+        "dota2MmrParty": "0-2500 / Unranked",
+        "dota2MmrWhereYouConsiderYouBelongHonest": "0-2500 / Unranked"
+    }
+]

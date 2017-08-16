@@ -25,46 +25,11 @@ public class Player{
 	}
 
 	public void setInitRank(){
-		switch(csGo){
-			case 1:
-				mmr[0] = 700;
-				break;
-			case 2: 
-				mmr[0] = 800;
-				break;
-			case 3: 
-				mmr[0] = 900;
-				break;
-			case 4: 
-				mmr[0] = 1000;
-				break;
-			case 5: 
-				mmr[0] = 1100;
-				break;
-			case 6: 
-				mmr[0] = 1200;
-				break;
-		}
-		switch(dota){
-			case 1:
-				mmr[1] = 700;
-				break;
-			case 2: 
-				mmr[1] = 800;
-				break;
-			case 3: 
-				mmr[1] = 900;
-				break;
-			case 4: 
-				mmr[1] = 1000;
-				break;
-			case 5: 
-				mmr[1] = 1100;
-				break;
-			case 6: 
-				mmr[1] = 1200;
-				break;
-		}
+		int kValue = 28; // around 500 / 18, där 18 = 6 * 3
+		int baseMMR = 700;
+		mmr[0] = kValue * csGo + baseMMR;
+		mmr[1] = kValue * dota + baseMMR;
+		System.out.println("Ranks: " + mmr[0] + " , " + mmr[1]);
 	}
 
 	public void setMmr(int game, int mmr){

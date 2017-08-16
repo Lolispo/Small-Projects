@@ -63,11 +63,14 @@ public class balancingSystem{
 		teamCombs = new ArrayList<TeamCombination>();
 		playedTeamCombs = new ArrayList<TeamCombination>();
 
+		//Should choose activeplayers			
+		activePlayers(this.playerList);
+	}
+
+	public void startBalancing(){
+		System.out.println("startBalancing");
 		int i = 0;
 		do{
-			//Should choose activeplayers
-			this.activePlayers = activePlayers(this.playerList); // #TODO
-
 			boolean newPlayers;
 			if(i == 0){ // # TODO ^activePlayers
 				newPlayers = true;
@@ -84,18 +87,18 @@ public class balancingSystem{
 			switch(rc){
 				case 0:
 					System.out.println("inhouseBalanceChosen");
-					balancedTeams = inhouseBalance(playerList, newPlayers);
+					balancedTeams = inhouseBalance(activePlayers, newPlayers);
 					break;
 				case 1:
 					System.out.println("balanced(old)chosen");
-					balancedTeams = balanced(playerList);
+					balancedTeams = balanced(activePlayers);
 					break;
 				case 2:
 					System.out.println("random(old)chosen");
-					balancedTeams = randomSeparation(playerList);
+					balancedTeams = randomSeparation(activePlayers);
 					break;
 				default: 
-					balancedTeams = inhouseBalance(playerList, newPlayers);
+					balancedTeams = inhouseBalance(activePlayers, newPlayers);
 			}
 
 			// Choose winner
@@ -120,6 +123,7 @@ public class balancingSystem{
 	*/
 		io.close();
 	}
+
 
 	balancingSystem(int game){
 		this(2,5, game);
@@ -290,23 +294,14 @@ public class balancingSystem{
 	}
 
 	// #TODO activePlayers
-	public ArrayList<Player> activePlayers(ArrayList<Player> allPlayersList){
-		
-		/*
-		JFrame frame = new JFrame();
-		// Gör components 
-		JContainer container1 = new JContainer();
-		JRadioButton button1 = new JRadioButton();
-		button1.setEventListener(new action(){
-			void actionPerformed(){
-				
-			}
-		});
-		JTextField text1 = new JTextField("");
-		container1.add(button1);
-		frame.add();
-*/
-		return allPlayersList;
+	public void activePlayers(ArrayList<Player> allPlayersList){
+		chooseActivePlayers foo = new chooseActivePlayers(allPlayersList, this);
+	}
+
+	public void sendActivePlayers(ArrayList<Player> activePlayers){
+		this.activePlayers = activePlayers;
+		System.out.println(activePlayers.size() + " = size of activePlayers in balS");
+		startBalancing();
 	}
 
 	public void readJSONData(String json){ // Static or not?
@@ -316,16 +311,35 @@ public class balancingSystem{
 
 		// Choosing players
 		// UPDATE THIS WITH NEW JSON INFO  https://docs.google.com/spreadsheets/d/1NNavWEzEf9gx3hBzh0vpQ_5pn7kjievQyiXA3PRhU34/edit#gid=31358158
+		/*
+ 		"timestamp": "2017-08-15T20:02:29.330Z",
+        "username": "Petter",
+        "languages": "English, Svenska",
+        "name": "Petter",
+        "currentCsgoRank": "Global",
+        "dota2MmrSolo": "4500-5500",
+        "csgoRankHighestInLastYear": "Global",
+        "csgoRankWhereYouConsiderYouBelongHonest": "Global",
+        "dota2MmrParty": "4500-5500",
+        "dota2MmrWhereYouConsiderYouBelongHonest": "3500-4500"
+
+		*/
 		for(JsonValue item : players){ 			
 			String name = item.asObject().getString("name", "Unknown Name");
   			String userName = item.asObject().getString("username", "Unknown Item");
   			String languageString = item.asObject().getString("languages", "Unknown Item");
-  			String csgoRank = item.asObject().getString("csgoRank", "Unknown Item");
-  			String dota2Mmr = item.asObject().getString("dota2Mmr", "Unknown Item");
-  			int csRank = csgoRank(csgoRank);
-  			int dotaRank = dotaMMR(dota2Mmr);
+  			String csgoRank = item.asObject().getString("currentCsgoRank", "Unknown Item");
+  			String csgoRankHighest = item.asObject().getString("csgoRankHighestInLastYear", "Unknown Item");
+  			String csgoRankBelong = item.asObject().getString("csgoRankWhereYouConsiderYouBelongHonest", "Unknown Item");
+  			String dota2MmrSolo = item.asObject().getString("dota2MmrSolo", "0-2500 / Unranked");
+  			String dota2MmrParty = item.asObject().getString("dota2MmrParty", "Unknown Item");
+  			String dota2MmrBelong = item.asObject().getString("dota2MmrWhereYouConsiderYouBelongHonest", "Unknown Item");
+  			int csRank = csgoRank(csgoRank, csgoRankHighest, csgoRankBelong);
+  			int dotaRank = dotaMMR(dota2MmrSolo, dota2MmrParty, dota2MmrBelong);
+  			/*
   			int csGo = item.asObject().getInt("csgo", 0);
   			int dota = item.asObject().getInt("dota2", 0);
+  			*/
   			Player p = new Player(name, userName,csRank,dotaRank,languageString); // csGo or csRank
   			playerList.add(p);
   			System.out.println(p);
@@ -334,9 +348,43 @@ public class balancingSystem{
 		}
 	}
 
-	public int csgoRank(String string){
+	public int csgoRank(String rank, String highest, String belong){
 		int value = 0;
-		switch(string){
+		int rankValue = csGoValue(rank);
+		int highestValue = csGoValue(highest);
+		if(highestValue == -1){
+			highestValue = rankValue;
+		}
+		int belongValue = csGoValue(belong);
+		if(belongValue == -1){
+			belongValue = rankValue;
+		}
+		value += rankValue;
+		value += highestValue;
+		value += belongValue;
+		return value;
+	}
+
+	public int dotaMMR(String solo, String party, String belong){
+		int value = 0;
+		int rankValue = dotaRank(solo);
+		int highestValue = dotaRank(party);
+		if(highestValue == -1){
+			highestValue = rankValue;
+		}
+		int belongValue = dotaRank(belong);
+		if(belongValue == -1){
+			belongValue = rankValue;
+		}
+		value += rankValue;
+		value += highestValue;
+		value += belongValue;
+		return value;
+	}
+
+	public int csGoValue(String rank){
+		int value = 0;
+		switch(rank){
 			case "Global":
 				value = 6;
 				break;
@@ -366,14 +414,14 @@ public class balancingSystem{
 			case "Silver 2":
 			case "Silver 1":
 			default:
-				value = 1;
+				value = -1;
 				break;
 		}
-		System.out.println(string + " = "+value);
+		System.out.println(rank + " = "+value);
 		return value;
 	}
 
-	public int dotaMMR(String string){
+	public int dotaRank(String string){
 		int value = 0;
 		switch(string){
 			case "6500+":
@@ -393,12 +441,11 @@ public class balancingSystem{
 				break;
 			case "0-2500 / Unranked":
 			default:
-				value = 1;
+				value = -1;
 				break;
 		}
 		return value;
 	}
-
 
 	public String stringTeam(ArrayList<Player> list){
 		StringBuilder sb = new StringBuilder();
