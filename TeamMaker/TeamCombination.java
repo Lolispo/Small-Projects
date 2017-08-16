@@ -236,14 +236,14 @@ public class TeamCombination{
 				teamSB.append(p.getUserName() + " ");
 				mmrTotal += p.getMmr(game);
 			}
-			sb.append("Team " +i +": " + teamSB.toString() + ". Avg MMR = " + (mmrTotal / 5)+ "\n");
+			sb.append("Team " +i +": " + teamSB.toString() + "\n\t Avg MMR = " + (mmrTotal / 5)+ "\n");
 			i++;
 		}
-		sb.append("Skill diff: " + this.skillDiff + "\n");
-		sb.append("TeamPlayerComparison: " + this.rangePrevTeams + "\n");
+		//sb.append("Skill diff: " + this.skillDiff + "\n");
+		//sb.append("TeamPlayerComparison: " + this.rangePrevTeams + "\n");
 		sb.append("MMR diff: " + this.mmrDiff + "\n");
 		sb.append("MMR at stake: \n\tTeam 1: +" + this.mmrChange1 + "/-"+ this.mmrChange2 + " \n\tTeam 2: +" + this.mmrChange2 + "/-"+ this.mmrChange1 +"\n");
-		sb.append("SCORE: " + this.comparableScore + " (Skill factor: " + this.skillImpactFactor+")\n");
+		sb.append("TeamMatchupSCORE: " + this.comparableScore + " (Skill diff: " + this.skillDiff +", TeamPlayerComparison: " + this.rangePrevTeams +")\n"); //"Skill factor: " + this.skillImpactFactor+")\n");
 		sb.append("----------------------------\n");
 		return sb.toString();
 	}

@@ -5,18 +5,30 @@ import javax.swing.*;
 // Author Petter Andersson
 // TODO are added in drive document atm for project
 // https://docs.google.com/document/d/1p4oNbBUb0dUV3-gGakf0nSoB1pZ1ikyoZjveuWObLLg/edit
+// Most important todos here
 
 /*
-	Göra alla kombinationer av lag, 10 över 5
-		Varje lag kombination sparar en skilllevel siffra mellan sig och siffra jämförelse med tidigare games
-	beräkna lägsta siffran av skill level jämförelse
-	efter ett game spelat - beräkna jämförelse med lagen, få ut nya lägsta
+	TODO:
+	Interaktion:
+		Gör så all interaktion sker i samma window
+			För att detta ska fungera så måste man fixa dessa funk till window:
+				window ställe för printing
+				ta tillbaka framen till balancingSystem så man kan fortsätta print updates här
+		Ändra så att man kan klicka att game är spelat, istället för att man kan klicka vem som vann direkt.
+	Databas sparning av data
+		Mmr läses in från databas istället för filen
+			Gör så att datan från docet endast behöver tas in en gång som sen sparar i databas
+		Interaktion med kth databas, pettea
+		Interagera interaktivt med databasen efter varje game för updatering av mmr
 
-	Lägg till eget ELO system, så man kan ha många olika sätt att välja balanserade lag när man valt active players
+	Supporta fler sätt att balanca för kul, starta "fun mode"
 		Elo balance
 		Inhouse balance = based on skill and prev teams
 		Only rank balance = First iteration = balanced(playerList);
 		Random balance = done? = randomSeparation(playerList)
+	Deluxe: 
+		Automatic transfer of JSON data from sheets -> database (system)
+		Supporta att adda fler spel (på nåt smidigt sätt)
 */
 
 public class balancingSystem{
@@ -107,8 +119,13 @@ public class balancingSystem{
 			}
 
 			// Should print result
-			finalPrint(balancedTeams);
-			simplePrint(balancedTeams);
+			String finalP = finalPrint(balancedTeams);
+			String simpleP = simplePrint(balancedTeams);
+			System.out.println(finalP);
+			System.out.println(simpleP);
+			if(!playAgain(finalP)){
+				break;
+			}
 			i++;
 		}while(i < amountOfTeamCombs);
 	
@@ -117,11 +134,26 @@ public class balancingSystem{
 		System.out.println("Played Games: ");
 		System.out.println("");
 		for(TeamCombination ptc : playedTeamCombs){
-			finalPrint(ptc.getTeamCombination());
-			simplePrint(ptc.getTeamCombination());
+			System.out.println(finalPrint(ptc.getTeamCombination()));
+			System.out.println(simplePrint(ptc.getTeamCombination()));
 		}
 	*/
 		io.close();
+	}
+
+	public boolean playAgain(String print){
+		String[] buttons = { "Play Again", "Exit"};
+		int rc = JOptionPane.showOptionDialog(null, print, "Play again?",
+        JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, buttons, buttons[0]);	
+
+		switch(rc){
+			case 0:
+				return true;
+			case 1: 
+	    		return false;
+	    	default:
+	    		return false;
+        }		
 	}
 
 
@@ -153,7 +185,7 @@ public class balancingSystem{
 
     	System.out.println("--------------------------");
 		System.out.println("Teams BEFORE rating change");
-		finalPrint(chosenTeams);
+		System.out.println(finalPrint(chosenTeams));
 		switch(rc){
 			case 0:
 				updateRating(true);
@@ -391,28 +423,31 @@ public class balancingSystem{
 			case "Supreme":
 				value = 5;
 				break;
-			case "Legendary Eagle Master":
+			case "LegendaryEagleMaster":
 				value = 4;
 				break;
-			case "Legendary Eagle":
+			case "LegendaryEagle":
 			case "DMG":
 				value = 3;
 				break;
-			case "Master Guardian Elite":
-			case "Master Guardian 2":
-			case "Master Guardian 1":
-			case "Gold Nova 4":
-			case "Gold Nova 3":
-			case "Gold Nova 2":
-			case "Gold Nova 1":
+			case "MasterGuardianElite":
+			case "MasterGuardian2":
+			case "MasterGuardian1":
+			case "GoldNova 4":
+			case "GoldNova 3":
+			case "GoldNova 2":
+			case "GoldNova 1":
 				value = 2;
 				break;
-			case "Silver Elite Master":
-			case "Silver Elite":
-			case "Silver 4":
-			case "Silver 3":
-			case "Silver 2":
-			case "Silver 1":
+			case "SilverEliteMaster":
+			case "SilverElite":
+			case "Silver4":
+			case "Silver3":
+			case "Silver2":
+			case "Silver1":
+			case "Unranked":
+				value = 1;
+				break;
 			default:
 				value = -1;
 				break;
@@ -439,7 +474,9 @@ public class balancingSystem{
 			case "2500-3500":
 				value = 2;
 				break;
-			case "0-2500 / Unranked":
+			case "0-2500/Unranked":
+				value = 1;
+				break;
 			default:
 				value = -1;
 				break;
@@ -471,7 +508,7 @@ public class balancingSystem{
 		return sb.toString();
 	}	
 
-	public void simplePrint(ArrayList<ArrayList<Player>> list){
+	public String simplePrint(ArrayList<ArrayList<Player>> list){
 		StringBuilder sb = new StringBuilder();
 		for(int j = 0; j < amountTeams; j++){
 			sb.append("Team "+ (j+1)+": ");
@@ -484,10 +521,11 @@ public class balancingSystem{
 			}
 			sb.append("\n");
 		}
-		System.out.println(sb.toString());
+		return sb.toString();
 	}
 
-	public void finalPrint(ArrayList<ArrayList<Player>> list){
+	public String finalPrint(ArrayList<ArrayList<Player>> list){
+		StringBuilder stringB = new StringBuilder();
 		int team = 0;
 		int[] teamTotal = new int[list.size()];
 		int[] mmrTotal = new int[list.size()];
@@ -499,8 +537,13 @@ public class balancingSystem{
 				sb.append(s);
 				for(int j = 0; j < 15-s.length(); j++) // Space adding foor loop it seems
 					sb.append(" ");
-				System.out.println("Team "+(team+1)+": Player " +(i+1)+ ": "+ 
-					sb.toString() + "Skill-level: " +p.getGameSkill(game) + " MMR: "+ p.getMmr(this.game));
+				String skillSpace = " ";
+				if(p.getGameSkill(game) < 10){
+					skillSpace = "  ";
+				}
+				String skillAndSpace = p.getGameSkill(game) + skillSpace;
+				stringB.append("Team "+(team+1)+": Player " +(i+1)+ ": "+ 
+					sb.toString() + "Skill-level: " + skillAndSpace + "MMR: "+ p.getMmr(this.game) + "\n");
 				teamTotal[team] += p.getGameSkill(game);
 				mmrTotal[team] += p.getMmr(this.game);
 				i++;
@@ -509,8 +552,9 @@ public class balancingSystem{
 		}
 		int amountOfTeams = team;
 		for(int i = 0; i < amountOfTeams; i++){
-			System.out.println("Team "+(i+1) +" skill score total:  " + teamTotal[i] + ". Avg MMR: "+  (mmrTotal[i] / amountPlayers));	
+			stringB.append("Team "+(i+1) +" skill score total:  " + teamTotal[i] + ". Avg MMR: "+  (mmrTotal[i] / amountPlayers) + "\n");	
 		}
+		return stringB.toString();
 	}
 
 	public ArrayList<ArrayList<Player>> balanced(ArrayList<Player> players){
