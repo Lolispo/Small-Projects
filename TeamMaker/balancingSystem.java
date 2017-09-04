@@ -1,6 +1,7 @@
 import java.util.*;
 import JSON.*;
 import javax.swing.*;
+import java.io.*;
 
 // Author Petter Andersson
 // TODO are added in drive document atm for project
@@ -42,7 +43,7 @@ public class balancingSystem{
 	private Random r;
 	private Kattio io;
 
-	private ArrayList<Player> playerList; // List of all players total #TODO Currently also used as active
+	private ArrayList<Player> playerList; // List of all players total
 	private ArrayList<Player> activePlayers; // Implement me?
 
 	private ArrayList<TeamCombination> teamCombs; // All teamcombinations for active players 
@@ -84,7 +85,7 @@ public class balancingSystem{
 		int i = 0;
 		do{
 			boolean newPlayers;
-			if(i == 0){ // # TODO ^activePlayers
+			if(i == 0){ 
 				newPlayers = true;
 			}else{
 				newPlayers = false;
@@ -113,9 +114,22 @@ public class balancingSystem{
 					balancedTeams = inhouseBalance(activePlayers, newPlayers);
 			}
 
+
+			System.out.println("---------------------------------\n");
+			System.out.println("Chosen team: ");
+			System.out.println(this.currentTeamComb.toString(this.game));
+
 			// Choose winner
-			if(!chooseWinner(balancedTeams)){
+			int exit = chooseWinner(balancedTeams);
+			if(exit == 2 || exit == 3){ // No Rating Update And Get New Best matchup
 				continue;
+			}
+			else if(exit == 4){ // Choose new players
+				newPlayers = true;
+				activePlayers(this.playerList);
+				break;
+			}else if(exit == 5){ // Exit
+				System.exit(1);
 			}
 
 			// Should print result
@@ -178,9 +192,9 @@ public class balancingSystem{
 			
 	}
 
-	public boolean chooseWinner(ArrayList<ArrayList<Player>> chosenTeams){
-        String[] buttons = { "Team 1", "Team 2", "Didn't Play" };
-    	int rc = JOptionPane.showOptionDialog(null, currentTeamComb.toStringShort(), "Who won?",
+	public int chooseWinner(ArrayList<ArrayList<Player>> chosenTeams){
+        String[] buttons = { "Team 1", "Team 2", "New Teams (No Rating Update)", "Remove Prev Matchups", "Change Players (Not working)", "Exit"};
+    	int rc = JOptionPane.showOptionDialog(null, currentTeamComb.toString(this.game), "Who won?",
         JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, buttons, buttons[2]);	
 
     	System.out.println("--------------------------");
@@ -190,15 +204,19 @@ public class balancingSystem{
 			case 0:
 				updateRating(true);
 				playedTeamCombs.add(currentTeamComb);
-				return true;
+				return rc;
 			case 1: 
 				updateRating(false);
 				playedTeamCombs.add(currentTeamComb);
-	    		return true;
-	    	case 2: 
-		    	return false;
+	    		return rc;
+	    	case 2:
+	    		playedTeamCombs.add(currentTeamComb);
+	    		return rc;
+	    	case 3:
+	    		playedTeamCombs.clear();
+	    		return rc;
 		    default: 
-		    	return false;
+		    	return rc;
         }		     		
 	}
 
@@ -214,10 +232,24 @@ public class balancingSystem{
 			losingTeam = currentTeamComb.getTeamCombination().get(0);
 		}
 		for(Player p : winningTeam){
+			p.setPG(p.getPG()+1);
 			p.setMmr(game, p.getMmr(game) + change);
 		}
 		for(Player p : losingTeam){
+			p.setPG(p.getPG()+1);
 			p.setMmr(game, p.getMmr(game) - change);
+		}
+		
+
+		try{
+			PrintWriter pw = new PrintWriter(new File("storedMMR.txt"));
+			for(Player p : playerList){
+				pw.println(p.getUserName() + " " + p.getMmr(0) + " " +p.getMmr(1) + " " + p.getPG());
+			}
+			pw.close();
+		}
+		catch(IOException e){
+			e.printStackTrace();
 		}
 	}
 
@@ -265,10 +297,6 @@ public class balancingSystem{
 			chosenTeamComb = chosenTeamCombs.get(r.nextInt(chosenTeamCombs.size()));
 		}
 		chosenTeamComb.calcMMRChange(this.game);
-
-		System.out.println("---------------------------------\n");
-		System.out.println("Chosen team: ");
-		System.out.println(chosenTeamComb.toString(this.game));
 
 		// We have the chosen combination - add to correct spots
 		this.currentTeamComb = chosenTeamComb;
@@ -325,9 +353,9 @@ public class balancingSystem{
 		return bothTeams;
 	}
 
-	// #TODO activePlayers
 	public void activePlayers(ArrayList<Player> allPlayersList){
-		chooseActivePlayers foo = new chooseActivePlayers(allPlayersList, this);
+		System.out.println("New Players");
+		new chooseActivePlayers(allPlayersList, this);
 	}
 
 	public void sendActivePlayers(ArrayList<Player> activePlayers){
@@ -356,6 +384,23 @@ public class balancingSystem{
         "dota2MmrWhereYouConsiderYouBelongHonest": "3500-4500"
 
 		*/
+
+		// Read file
+		HashMap<String, int[]> fileList = new HashMap<String, int[]>();
+		try{
+			Scanner fileReader = new Scanner(new File("storedMMR.txt"));
+			while(fileReader.hasNextLine()){
+				String s = fileReader.nextLine();
+				String[] sArr = s.split(" ");
+				fileList.put(sArr[0], new int[]{Integer.parseInt(sArr[1]), Integer.parseInt(sArr[2]), Integer.parseInt(sArr[3])});
+			}
+			fileReader.close();
+		}
+		catch(FileNotFoundException e){
+			e.printStackTrace();
+		}
+
+
 		for(JsonValue item : players){ 			
 			String name = item.asObject().getString("name", "Unknown Name");
   			String userName = item.asObject().getString("username", "Unknown Item");
@@ -366,122 +411,31 @@ public class balancingSystem{
   			String dota2MmrSolo = item.asObject().getString("dota2MmrSolo", "0-2500 / Unranked");
   			String dota2MmrParty = item.asObject().getString("dota2MmrParty", "Unknown Item");
   			String dota2MmrBelong = item.asObject().getString("dota2MmrWhereYouConsiderYouBelongHonest", "Unknown Item");
-  			int csRank = csgoRank(csgoRank, csgoRankHighest, csgoRankBelong);
-  			int dotaRank = dotaMMR(dota2MmrSolo, dota2MmrParty, dota2MmrBelong);
+  				
+  			// Check in read file list after mmr
+  			// Init cmmr and dmmr
+  			Rating r = null;
+  			if(fileList.containsKey(userName)){
+  				int[] tempMMR = fileList.get(userName);
+  				r = new Rating(tempMMR[0], tempMMR[1], tempMMR[2]);
+  			}
+  			else{
+  				r = new Rating(csgoRank, csgoRankHighest, csgoRankBelong, dota2MmrSolo, dota2MmrParty, dota2MmrBelong);
+  			}
+
+  			int[] mmr = r.getMMR();
+  			int pg = r.getPG();
+
   			/*
   			int csGo = item.asObject().getInt("csgo", 0);
   			int dota = item.asObject().getInt("dota2", 0);
   			*/
-  			Player p = new Player(name, userName,csRank,dotaRank,languageString); // csGo or csRank
+  			Player p = new Player(name, userName, mmr, pg, languageString); // csGo or csRank
   			playerList.add(p);
   			System.out.println(p);
   			//String name, String userName, int csGo, int dota, String languageString
 			//System.out.println(item);
 		}
-	}
-
-	public int csgoRank(String rank, String highest, String belong){
-		int value = 0;
-		int rankValue = csGoValue(rank);
-		int highestValue = csGoValue(highest);
-		if(highestValue == -1){
-			highestValue = rankValue;
-		}
-		int belongValue = csGoValue(belong);
-		if(belongValue == -1){
-			belongValue = rankValue;
-		}
-		value += rankValue;
-		value += highestValue;
-		value += belongValue;
-		return value;
-	}
-
-	public int dotaMMR(String solo, String party, String belong){
-		int value = 0;
-		int rankValue = dotaRank(solo);
-		int highestValue = dotaRank(party);
-		if(highestValue == -1){
-			highestValue = rankValue;
-		}
-		int belongValue = dotaRank(belong);
-		if(belongValue == -1){
-			belongValue = rankValue;
-		}
-		value += rankValue;
-		value += highestValue;
-		value += belongValue;
-		return value;
-	}
-
-	public int csGoValue(String rank){
-		int value = 0;
-		switch(rank){
-			case "Global":
-				value = 6;
-				break;
-			case "Supreme":
-				value = 5;
-				break;
-			case "LegendaryEagleMaster":
-				value = 4;
-				break;
-			case "LegendaryEagle":
-			case "DMG":
-				value = 3;
-				break;
-			case "MasterGuardianElite":
-			case "MasterGuardian2":
-			case "MasterGuardian1":
-			case "GoldNova 4":
-			case "GoldNova 3":
-			case "GoldNova 2":
-			case "GoldNova 1":
-				value = 2;
-				break;
-			case "SilverEliteMaster":
-			case "SilverElite":
-			case "Silver4":
-			case "Silver3":
-			case "Silver2":
-			case "Silver1":
-			case "Unranked":
-				value = 1;
-				break;
-			default:
-				value = -1;
-				break;
-		}
-		System.out.println(rank + " = "+value);
-		return value;
-	}
-
-	public int dotaRank(String string){
-		int value = 0;
-		switch(string){
-			case "6500+":
-				value = 6;
-				break;
-			case "5500-6500":
-				value = 5;
-				break;
-			case "4500-5500":
-				value = 4;
-				break;
-			case "3500-4500":
-				value = 3;
-				break;
-			case "2500-3500":
-				value = 2;
-				break;
-			case "0-2500/Unranked":
-				value = 1;
-				break;
-			default:
-				value = -1;
-				break;
-		}
-		return value;
 	}
 
 	public String stringTeam(ArrayList<Player> list){
@@ -537,13 +491,8 @@ public class balancingSystem{
 				sb.append(s);
 				for(int j = 0; j < 15-s.length(); j++) // Space adding foor loop it seems
 					sb.append(" ");
-				String skillSpace = " ";
-				if(p.getGameSkill(game) < 10){
-					skillSpace = "  ";
-				}
-				String skillAndSpace = p.getGameSkill(game) + skillSpace;
 				stringB.append("Team "+(team+1)+": Player " +(i+1)+ ": "+ 
-					sb.toString() + "Skill-level: " + skillAndSpace + "MMR: "+ p.getMmr(this.game) + "\n");
+					sb.toString() + "\t\tMMR: "+ p.getMmr(this.game) + "\n");
 				teamTotal[team] += p.getGameSkill(game);
 				mmrTotal[team] += p.getMmr(this.game);
 				i++;

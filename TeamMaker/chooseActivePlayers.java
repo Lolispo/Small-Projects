@@ -7,7 +7,7 @@ public class chooseActivePlayers{
 
 	private balancingSystem balanceS;
 
-	private JFrame frame;
+	private static JFrame frame;
 	private JPanel outerPanel;
 	private JPanel panel;
 	private JTextField info;
@@ -29,8 +29,12 @@ public class chooseActivePlayers{
 	}
 
 	public void initFrame(){
-		frame = new JFrame();
-		frame.setSize(600,800);
+		System.out.println("initFrame");
+
+		if(frame == null){
+			frame = new JFrame();
+		}
+		frame.setSize(600,1000);
 		frame.setTitle("Choose active players");
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -39,9 +43,19 @@ public class chooseActivePlayers{
 	public chooseActivePlayers(ArrayList<Player> playersList, balancingSystem balanceS){
 		initFrame();
 		this.balanceS = balanceS;
-		this.selectedCounter = 0;
+		this.selectedCounter = 10;
 		this.playersList = playersList;
+		Collections.sort(this.playersList, new Comparator<Player>(){
+		  public int compare(Player p1, Player p2){
+		  	 int x = p1.getPG();
+		  	 int y = p2.getPG();
+		  	 if(x > y) return -1;
+		  	 else if(x < y) return 1;
+		  	 return 0;
+		  }
+		});
 		this.amountPlayers = playersList.size();
+		System.out.println("lets go");
 		initPanels();
 		setUpPlayers(amountPlayers);
 	}
@@ -69,6 +83,7 @@ public class chooseActivePlayers{
 	 * When amountOfPlayers is chosen, Name options are given.
 	 */
 	public void setUpPlayers(int amountOfPlayers){
+		System.out.println("setUp");
 		text = new JTextField[amountPlayers];
 		playing = new JCheckBox[amountPlayers];
 		name = new JLabel[amountPlayers];
@@ -100,6 +115,9 @@ public class chooseActivePlayers{
 			playerPanel[i].add(text[i]);
 			panel.add(playerPanel[i]);
 		}
+		for(int i = 0; i < 10; i++){
+			playing[i].setSelected(true);
+		}
 		panel.add(Box.createVerticalStrut(100));
 		final JButton done = new JButton("Choose these players");
 		done.addActionListener(new ActionListener(){
@@ -116,6 +134,7 @@ public class chooseActivePlayers{
 				}
 			}
 		});
+		System.out.println("END SETUP");
 		panel.add(done, BorderLayout.SOUTH);
 		frame.revalidate();
 		frame.repaint();
@@ -126,6 +145,7 @@ public class chooseActivePlayers{
 	 * Gives a final options to choose size of the table
 	 */
 	public void startButton(){
+		System.out.println("Lets start");
 		int amount = getAmountPlayers();
 		activePlayers = new ArrayList<Player>();
 		for(int i = 0; i < amount; i++){
@@ -143,10 +163,11 @@ public class chooseActivePlayers{
 		for(JLabel nameF : name){
 			panel.remove(nameF);
 		}
+		// Move to next section
 		balanceS.sendActivePlayers(activePlayers);
 		panel.removeAll();
-		// Move to next section
 		frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+
 //		GameGenerator g = new GameGenerator(amountPlayers, frame, players, panel);
 //		g.setRoles(check.isSelected());
 		//frame.setSize(600,600);

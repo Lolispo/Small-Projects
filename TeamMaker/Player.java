@@ -5,33 +5,31 @@ public class Player{
 	private String userName;
 	private int csGo; // 0 cs, 1 dota
 	private int dota;
+	private int playedGames;
 	private String[] languages; // Choose correct datastructure
 	private String languageString;
 	private int[] mmr;
 
-	public Player(String name, String userName, int csGo, int dota, String languageString){
+	public Player(String name, String userName, int[] mmr, int playedGames, String languageString){
 		this.name = name;
 		this.userName = userName;
-		this.csGo = csGo;
-		this.dota = dota;
+		this.mmr = mmr;
+		this.csGo = mmr[0];
+		this.dota = mmr[1];
 		this.languageString = languageString;
+		this.playedGames = playedGames;
 		languages = languageString.split(", ");		
 		mmr = new int[2]; // Amount of games with mmr
-		setInitRank();
 	}
 
-	public Player(String userName, int csGo, int dota, String languageString){
-		this("", userName, csGo, dota, languageString);
+	public void setPG(int pg){
+		this.playedGames = pg;
 	}
-
-	public void setInitRank(){
-		int kValue = 28; // around 500 / 18, där 18 = 6 * 3
-		int baseMMR = 700;
-		mmr[0] = kValue * csGo + baseMMR;
-		mmr[1] = kValue * dota + baseMMR;
-		System.out.println("Ranks: " + mmr[0] + " , " + mmr[1]);
+	
+	public int getPG(){
+		return this.playedGames;
 	}
-
+	
 	public void setMmr(int game, int mmr){
 		this.mmr[game] = mmr;
 	}
