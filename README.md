@@ -10,4 +10,4 @@ Original inhousebot, without mmr, purely in Java and without finished ideas
 
 ## rconMaker (AsciiReader)
 
-Small program to make already functioning CS configs into rcon configs
+Small program to make already functional CS configs into rcon configs
